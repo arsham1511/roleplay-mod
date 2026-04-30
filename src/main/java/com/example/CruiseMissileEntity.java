@@ -34,7 +34,7 @@ public class CruiseMissileEntity extends Entity {
     @Override
     public void tick() {
         super.tick();
-        if (!launched || targetPos == null || getWorld().isClient) return;
+        if (targetPos == null || getWorld().isClient) return;
 
         Vec3d targetVec = Vec3d.ofCenter(targetPos);
         Vec3d motion = targetVec.subtract(getPos()).normalize().multiply(0.7);

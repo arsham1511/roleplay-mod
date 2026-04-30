@@ -36,6 +36,7 @@ jobs:
         run: |
           git config --global user.name "Aero-Smuggler-Bot"
           git config --global user.email "bot@sky.com"
-          git add part1/ part2/ part3/ part4/
-          git commit -m "🚀 محموله Blockbench در پوشه‌ها تخلیه شد!"
-          git push origin master
+          git add .
+          git commit -m "🚀 تخلیه نهایی پارت‌های Blockbench"
+          # استفاده از متغیر سیستمی برای پیدا کردن اسم دقیق شاخه
+          git push origin ${GITHUB_REF##*/}

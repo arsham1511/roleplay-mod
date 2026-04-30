@@ -1,34 +1,41 @@
-name: Secret Delivery - Blockbench Artifacts
+name: Manual Delivery to Repo Folders
 on:
   workflow_dispatch:
 
 jobs:
-  download_and_upload:
+  smuggle_files:
     runs-on: ubuntu-latest
+    permissions: # تضمین دسترسی نوشتاری در سطح جاب
+      contents: write
     steps:
-      - name: Download Blockbench
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Grab and Chop
         run: |
-          curl -L -o Blockbench_Installer.exe https://github.com/JannisX11/blockbench/releases/download/v5.1.4/Blockbench_5.1.4.exe
+          # دانلود
+          curl -L -o Blockbench.exe https://github.com/JannisX11/blockbench/releases/download/v5.1.4/Blockbench_5.1.4.exe
+          
+          # ساخت پوشه‌ها
+          mkdir -p part1 part2 part3 part4
+          
+          # تقسیم هندوانه‌ای (به ۴ قسمت)
+          split -n 4 -d Blockbench.exe part_
+          
+          # انتقال به پوشه‌ها
+          mv part_00 part1/blockbench.p1
+          mv part_01 part2/blockbench.p2
+          mv part_02 part3/blockbench.p3
+          mv part_03 part4/blockbench.p4
+          
+          rm Blockbench.exe
 
-      - name: Split File
+      - name: Push to Repo
         run: |
-          split -b 40M -d Blockbench_Installer.exe part_
-          # این فایل رو به قطعات 40 مگابایتی تقسیم می‌کنه
-
-      - name: Upload Part 0
-        uses: actions/upload-artifact@v4
-        with:
-          name: blockbench-part-0
-          path: part_00
-
-      - name: Upload Part 1
-        uses: actions/upload-artifact@v4
-        with:
-          name: blockbench-part-1
-          path: part_01
-
-      - name: Upload Part 2
-        uses: actions/upload-artifact@v4
-        with:
-          name: blockbench-part-2
-          path: part_02
+          git config --global user.name "Aero-Smuggler-Bot"
+          git config --global user.email "bot@sky.com"
+          git add part1/ part2/ part3/ part4/
+          git commit -m "🚀 محموله Blockbench در پوشه‌ها تخلیه شد!"
+          git push origin main

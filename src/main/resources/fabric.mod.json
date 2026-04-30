@@ -16,11 +16,11 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.example.ExampleMod"
-		],
-		"client": [
-			"com.example.client.ExampleModClient"
-		]
+	      "com.example.CruiseMissileMod"
+	    ],
+	    "client": [
+	      "com.example.CruiseMissileClient"
+	    ]
 	},
 	"mixins": [
 		"modid.mixins.json",

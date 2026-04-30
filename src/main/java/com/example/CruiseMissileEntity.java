@@ -18,6 +18,7 @@ public class CruiseMissileEntity extends Entity {
 
     public CruiseMissileEntity(EntityType<?> type, World world) {
         super(type, world);
+        this.noClip = false; // اجازه بده به دیوار بخوره و بترکه
     }
 
     @Override
@@ -26,6 +27,7 @@ public class CruiseMissileEntity extends Entity {
         if (stack.getItem() instanceof TargetingStickItem && stack.hasNbt()) {
             this.targetPos = BlockPos.fromLong(stack.getNbt().getLong("target_pos"));
             this.launched = true;
+            this.setNoGravity(true); // مهم: وقتی شلیک شد، دیگه جاذبه روش اثر نذاره
             return ActionResult.SUCCESS;
         }
         return ActionResult.PASS;
@@ -34,25 +36,44 @@ public class CruiseMissileEntity extends Entity {
     @Override
     public void tick() {
         super.tick();
-        if (targetPos == null || getWorld().isClient) return;
+
+        // اگه شلیک نشده یا کلاینته، کاری نکن
+        if (!launched || targetPos == null || getWorld().isClient) return;
 
         Vec3d targetVec = Vec3d.ofCenter(targetPos);
-        Vec3d motion = targetVec.subtract(getPos()).normalize().multiply(0.7);
+        Vec3d currentPos = getPos();
+
+        // محاسبه جهت و حرکت
+        Vec3d motion = targetVec.subtract(currentPos).normalize().multiply(0.7);
         this.setVelocity(motion);
+        this.velocityDirty = true; // اجبار سرور به آپدیت کردن سرعت
+        this.velocityModified = true;
+
         this.move(MovementType.SELF, getVelocity());
 
-        if (getPos().distanceTo(targetVec) < 2.0 || this.horizontalCollision || this.verticalCollision) {
+        // منطق چرخش (Yaw/Pitch) که موشک کج نباشه
+        double dx = targetVec.x - currentPos.x;
+        double dy = targetVec.y - currentPos.y;
+        double dz = targetVec.z - currentPos.z;
+        this.setYaw((float) Math.toDegrees(Math.atan2(-dx, dz)));
+        this.setPitch((float) Math.toDegrees(Math.asin(-dy / targetVec.distanceTo(currentPos))));
+
+        // چک کردن برخورد یا رسیدن به هدف
+        if (currentPos.distanceTo(targetVec) < 2.0 || this.horizontalCollision || this.verticalCollision) {
             getWorld().createExplosion(this, getX(), getY(), getZ(), 10.0f, World.ExplosionSourceType.TNT);
             this.discard();
         }
     }
 
     @Override protected void initDataTracker() {}
+    
     @Override
     protected void readCustomDataFromNbt(NbtCompound nbt) {
         launched = nbt.getBoolean("launched");
         if (nbt.contains("target_pos")) targetPos = BlockPos.fromLong(nbt.getLong("target_pos"));
+        if (launched) this.setNoGravity(true);
     }
+
     @Override
     protected void writeCustomDataToNbt(NbtCompound nbt) {
         nbt.putBoolean("launched", launched);

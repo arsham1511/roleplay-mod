@@ -38,4 +38,4 @@ jobs:
           git config --global user.email "bot@sky.com"
           git add part1/ part2/ part3/ part4/
           git commit -m "🚀 محموله Blockbench در پوشه‌ها تخلیه شد!"
-          git push origin main
+          git push origin master

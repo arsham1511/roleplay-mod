@@ -1,0 +1,34 @@
+name: Secret Delivery - Blockbench Artifacts
+on:
+  workflow_dispatch:
+
+jobs:
+  download_and_upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Blockbench
+        run: |
+          curl -L -o Blockbench_Installer.exe https://github.com/JannisX11/blockbench/releases/download/v5.1.4/Blockbench_5.1.4.exe
+
+      - name: Split File
+        run: |
+          split -b 40M -d Blockbench_Installer.exe part_
+          # این فایل رو به قطعات 40 مگابایتی تقسیم می‌کنه
+
+      - name: Upload Part 0
+        uses: actions/upload-artifact@v4
+        with:
+          name: blockbench-part-0
+          path: part_00
+
+      - name: Upload Part 1
+        uses: actions/upload-artifact@v4
+        with:
+          name: blockbench-part-1
+          path: part_01
+
+      - name: Upload Part 2
+        uses: actions/upload-artifact@v4
+        with:
+          name: blockbench-part-2
+          path: part_02

@@ -22,13 +22,6 @@
 	      "com.example.CruiseMissileClient"
 	    ]
 	},
-	"mixins": [
-		"modid.mixins.json",
-		{
-			"config": "modid.client.mixins.json",
-			"environment": "client"
-		}
-	],
 	"depends": {
 		"fabricloader": ">=0.19.1",
 		"minecraft": "~1.20.1",
